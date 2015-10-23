@@ -1,7 +1,7 @@
 sectra
 ==========
 
-sectra stands for **Sec**rets **Tra**nsport. Sensitive information is encrypted and securely transfered by piggybacking on SSH v2 protocol.  
+sectra stands for **Sec**rets **Tra**nsport. Sensitive information is encrypted and securely transfered by piggybacking on the SSH v2 protocol.  
 It's essential a funny behaving SSH server.
 
 #### Usage:
