@@ -30,7 +30,7 @@ A file named `payload` in the same user-sepcific subdirectory contains the actua
 
 #### How to connect to the _sectra_ server:
 
-        $ ssh -q <USERNAME>@<sectra-HOST-IP> -p 3333
+        $ ssh -q username@<sectra-HOST-IP> -p 3333
 
 #### License
 
