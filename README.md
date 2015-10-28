@@ -6,7 +6,7 @@ It's essential a funny behaving SSH server.
 
 #### Usage:
 
-- First make sure you have a SSH keypair in place which is used by sectra itself (generate one with: `ssh-keygen -t rsa -b 4096`). The keypair has to be placed inside the `host_key` directory. The private key file has to be named `id_rsa` and the public key part `id_rsa.pub`. Please be careful with the usage of passphrases in your SSH key. If the SSH key you generate has a passphrase, then you need to make sure that it is added to your SSH agent before you start the service.
+- First make sure you have a SSH keypair - the _host key_ - in place which is used by sectra itself (generate one with: `ssh-keygen -t rsa -b 4096`). Please generate this keypair **without using a passphrase**! The keypair has to be placed inside the `host_key` directory. The private key file has to be named `id_rsa` and the public key part `id_rsa.pub`.
 
 - Secondly create a subdirectory under the `data` directory which has to match a SSH username that should be allowed to connect to the sectra server. Inside the user-sepcific subdirectory, the public SSH key of the user who is allowed to connect has to placed in a file named `id_rsa.pub`.
 A file named `payload` in the same user-sepcific subdirectory contains the actually sensitive information which should be transfered (make sure it uses DOS line endings (`:set ff=dos` in Vim)).
