@@ -19,18 +19,51 @@ package main
 import (
 	"crypto/md5"
 	"fmt"
-	"golang.org/x/crypto/ssh"
+	"github.com/asemt/sectra/Godeps/_workspace/src/github.com/juju/deputy"
+	"github.com/asemt/sectra/Godeps/_workspace/src/golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"log"
 	"net"
 	"os"
+	"os/exec"
 )
 
 var (
 	authorizedPubKey ssh.PublicKey
 )
 
-//
+// Check if a SSH key pair which is required for sectra to work does exist.
+// If not, we are creating one on the fly.
+func init() {
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Printf("(init) >>  Error: Could not figure out current working directory: %s", err.Error())
+		os.Exit(1)
+	}
+	hPriKeyPth := fmt.Sprintf("%s/host_key/id_rsa", cwd)
+	_, err = ioutil.ReadFile(hPriKeyPth)
+	if err != nil {
+		// No private host key found, so we generate one.
+		d := deputy.Deputy{
+			Errors:    deputy.FromStderr,
+			StdoutLog: func(b []byte) { log.Printf("(init) >>  %s", string(b)) },
+		}
+		log.Println("(init) >>  No private host key found. Generating one...")
+		cmd := exec.Command("ssh-keygen", "-b", "4096", "-t", "rsa", "-f", "./host_key/id_rsa", "-q", "-C", "", "-N", "")
+		for _, arg := range cmd.Args {
+			log.Printf("--> %s", arg)
+		}
+		err := d.Run(cmd)
+		if err != nil {
+			log.Printf("(init) >>  Failed to generate private host key '%s'. Error: %s\n", hPriKeyPth, err.Error())
+			os.Exit(1)
+		}
+		log.Printf("(init) >>  Successfully generated private host key '%s'\n", hPriKeyPth)
+	}
+
+}
+
+// Compares to public SSH keys for equality.
 func theseTwoPublicKeysAreEqual(one, other ssh.PublicKey) bool {
 	oneKeyMshld := ssh.MarshalAuthorizedKey(one)
 	otherKeyMshld := ssh.MarshalAuthorizedKey(other)
@@ -45,6 +78,7 @@ func theseTwoPublicKeysAreEqual(one, other ssh.PublicKey) bool {
 	return true
 }
 
+// Reads in the private host key which is used by sectra itself.
 func getPrivHostKey() (ssh.Signer, error) {
 
 	cwd, err := os.Getwd()
@@ -70,6 +104,7 @@ func getPrivHostKey() (ssh.Signer, error) {
 	return hostPrivateKeySigner, err
 }
 
+// Reads a public SSH key from the file system for a user specified by 'username'.
 func getPubKeyForUser(username string) (ssh.PublicKey, error) {
 
 	cwd, err := os.Getwd()
@@ -103,6 +138,7 @@ func getPubKeyForUser(username string) (ssh.PublicKey, error) {
 	return authorizedPubKey, nil
 }
 
+// Generates a MD5 based fingerprint of a SSH key.
 func pubKeyFingerprint(key ssh.PublicKey) (string, error) {
 	h := md5.New()
 	_, err := h.Write(key.Marshal())
@@ -113,6 +149,7 @@ func pubKeyFingerprint(key ssh.PublicKey) (string, error) {
 	return fp, nil
 }
 
+// Callback function responsible for authenticating the SSH client.
 func keyAuth(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
 	log.Printf("(keyAuth) >>  New client conn from '%s' authenticating with '%s'\n", conn.RemoteAddr(), key.Type())
 	// Check if the user is allowed to connect at all (meaning: the must be a subdirectory in the 'data' dir
@@ -144,6 +181,7 @@ func keyAuth(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error)
 	return nil, fmt.Errorf("Wrong username and/or public key.")
 }
 
+// Handle new connection attempts from SSH clients.
 func handleNewClientConn(newClientInfoChan chan NewClientInfo) {
 
 	for newClientInfo := range newClientInfoChan {
@@ -220,6 +258,7 @@ func handleNewClientConn(newClientInfoChan chan NewClientInfo) {
 	}
 }
 
+// Information about a connecting SSH client.
 type NewClientInfo struct {
 	nConn           net.Conn
 	serverConfigPtr ssh.ServerConfig

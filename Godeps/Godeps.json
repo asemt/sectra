@@ -3,6 +3,10 @@
 	"GoVersion": "go1.5.1",
 	"Deps": [
 		{
+			"ImportPath": "github.com/juju/deputy",
+			"Rev": "9db96ecdd1479ea997e6e6e461e145ddd55ea561"
+		},
+		{
 			"ImportPath": "golang.org/x/crypto/curve25519",
 			"Rev": "346896d57731cb5670b36c6178fc5519f3225980"
 		},
