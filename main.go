@@ -50,9 +50,6 @@ func init() {
 		}
 		log.Println("(init) >>  No private host key found. Generating one...")
 		cmd := exec.Command("ssh-keygen", "-b", "4096", "-t", "rsa", "-f", "./host_key/id_rsa", "-q", "-C", "", "-N", "")
-		for _, arg := range cmd.Args {
-			log.Printf("--> %s", arg)
-		}
 		err := d.Run(cmd)
 		if err != nil {
 			log.Printf("(init) >>  Failed to generate private host key '%s'. Error: %s\n", hPriKeyPth, err.Error())
