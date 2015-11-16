@@ -1,10 +1,11 @@
 /*
- 	Inspired by:
+ 	Inspired by / "borrowed" from:
  	- https://github.com/FiloSottile/whosthere
 	- http://blog.scalingo.com/post/104426674353/writing-a-replacement-to-openssh-using-go-12
 	- http://blog.scalingo.com/post/105010314493/writing-a-replacement-to-openssh-using-go-22
 	- https://vtllf.org/blog/ssh-web-sign-in
-	- https://medium.com/@shazow/ssh-how-does-it-even-9e43586e4ffc#.wbi4hsbb1Source: https://github.com/Scalingo/go-ssh-examples/blob/master/server_git.go
+	- https://medium.com/@shazow/ssh-how-does-it-even-9e43586e4ffc#.wbi4hsbb1Source
+	- https://github.com/Scalingo/go-ssh-examples/blob/master/server_git.go
 	- https://godoc.org/golang.org/x/crypto/ssh#example-NewServerConn
 
 
@@ -16,9 +17,9 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
 	"golang.org/x/crypto/ssh"
-	"crypto/md5"
 	"io/ioutil"
 	"log"
 	"net"
