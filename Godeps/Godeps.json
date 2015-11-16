@@ -1,0 +1,14 @@
+{
+	"ImportPath": "github.com/asemt/sectra",
+	"GoVersion": "go1.5.1",
+	"Deps": [
+		{
+			"ImportPath": "golang.org/x/crypto/curve25519",
+			"Rev": "346896d57731cb5670b36c6178fc5519f3225980"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh",
+			"Rev": "346896d57731cb5670b36c6178fc5519f3225980"
+		}
+	]
+}
