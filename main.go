@@ -17,6 +17,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/md5"
 	"fmt"
 	"github.com/asemt/sectra/Godeps/_workspace/src/github.com/juju/deputy"
@@ -101,38 +102,70 @@ func getPrivHostKey() (ssh.Signer, error) {
 	return hostPrivateKeySigner, err
 }
 
+// Helper function to read a file line by line.
+func readLines(path string) ([][]byte, error) {
+	// Contains the contents of the file specified by 'path'.
+	var fCnt [][]byte
+	inFile, err := os.Open(path)
+	if err != nil {
+		log.Printf("(readLine) >>  Error opening file '%s': %s", path, err.Error())
+		return nil, fmt.Errorf(err.Error())
+	}
+	defer inFile.Close()
+	scanner := bufio.NewScanner(inFile)
+
+	for scanner.Scan() {
+		fCnt = append(fCnt, scanner.Bytes())
+	}
+	return fCnt, err
+}
+
 // Reads a public SSH key from the file system for a user specified by 'username'.
-func getPubKeyForUser(username string) (ssh.PublicKey, error) {
+func getPubKeysForUser(username string) ([]ssh.PublicKey, error) {
+
+	// Contains all authorized public SSH keys for the user specified by 'username'.
+	var userAuthKeys []ssh.PublicKey
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		log.Printf("(getPubKeyForUser) >>  Error: Could not figure out current working directory: %s", err.Error())
+		log.Printf("(getPubKeysForUser) >>  Error: Could not figure out current working directory: %s", err.Error())
 		return nil, err
 	}
 
-	pubKeyPath := fmt.Sprintf("%s/data/%s/id_rsa.pub", cwd, username)
+	pubKeyPath := fmt.Sprintf("%s/data/%s/authorized_keys", cwd, username)
 
-	pubKeyFile, err := os.Open(pubKeyPath)
+	authKeyFile, err := os.Open(pubKeyPath)
 	if err != nil {
-		log.Printf("(getPubKeyForUser) >>  Error opening pub key file '%s' for user '%s': %s", pubKeyPath, username, err.Error())
-		return nil, fmt.Errorf("(getPubKeyForUser) >>  Error opening pub key file '%s'", pubKeyPath)
+		log.Printf("(getPubKeysForUser) >>  Error opening pub key file '%s' for user '%s': %s", pubKeyPath, username, err.Error())
+		return nil, fmt.Errorf("(getPubKeysForUser) >>  Error opening pub key file '%s'", pubKeyPath)
 	}
-	defer pubKeyFile.Close()
+	defer authKeyFile.Close()
 
-	var authorizedPubKeyBuf []byte
-	authorizedPubKeyBuf, err = ioutil.ReadAll(pubKeyFile)
+	authKeyFileCnt, err := readLines(pubKeyPath)
 	if err != nil {
-		log.Printf("(getPubKeyForUser) >>  Error: Could not read PubKey at path: %s", pubKeyPath)
+		log.Printf("(getPubKeysForUser) >>  Error reading contents of pub key file '%s' for user '%s': %s", pubKeyPath, username, err.Error())
 		return nil, err
 	}
 
-	authorizedPubKey, _, _, _, err = ssh.ParseAuthorizedKey(authorizedPubKeyBuf)
-	if err != nil {
-		log.Printf("(getPubKeyForUser) >>  Error: Unable to parse AuthorizedPubKey: '%s'. Error: %s", pubKeyPath, err.Error())
-		return nil, err
+	for i, authKey := range authKeyFileCnt {
+		authorizedPubKey, _, _, _, err = ssh.ParseAuthorizedKey(authKey)
+		if err != nil {
+			log.Printf("(getPubKeysForUser) >>  Error: Unable to parse AuthorizedPubKey %d in '%s'. Error: %s", i, pubKeyPath, err.Error())
+			return nil, err
+		}
+
+		log.Printf("(getPubKeysForUser) >>  Successfully parsed authorized PubKey: %d for user '%s'\n", i, username)
+		userAuthKeys = append(userAuthKeys, authorizedPubKey)
+
 	}
-	log.Printf("(getPubKeyForUser) >>  Successfully parsed authorized PubKey: %s\n", pubKeyPath)
-	return authorizedPubKey, nil
+
+	//	var authorizedPubKeyBuf []byte
+	//	authorizedPubKeyBuf, err = ioutil.ReadAll(authKeyFile)
+	//	if err != nil {
+	//		log.Printf("(getPubKeysForUser) >>  Error: Could not read PubKey at path: %s", pubKeyPath)
+	//		return nil, err
+	//	}
+	return userAuthKeys, nil
 }
 
 // Generates a MD5 based fingerprint of a SSH key.
@@ -149,27 +182,40 @@ func pubKeyFingerprint(key ssh.PublicKey) (string, error) {
 // Callback function responsible for authenticating the SSH client.
 func keyAuth(conn ssh.ConnMetadata, key ssh.PublicKey) (*ssh.Permissions, error) {
 	log.Printf("(keyAuth) >>  New client conn from '%s' authenticating with '%s'\n", conn.RemoteAddr(), key.Type())
-	// Check if the user is allowed to connect at all (meaning: the must be a subdirectory in the 'data' dir
-	// matching the provided SSH username).
-	authorizedPubKey, err := getPubKeyForUser(conn.User())
+
+	// Create a fingerprint of the external provided pub key.
+	fpProvidedPubKey, err := pubKeyFingerprint(key)
+	if err != nil {
+		log.Printf("(keyAuth) >>  Error: Unable to create fingerprint for provided PubKey: %s\n", err.Error())
+	}
+	log.Printf("(keyAuth) >>  Fingerprint of provided PubKey    : %s\n", fpProvidedPubKey)
+
+	// Get all the pub keys for a given user.
+	authorizedPubKeys, err := getPubKeysForUser(conn.User())
 	if err != nil {
 		return nil, fmt.Errorf("(keyAuth) >>  No pub key for user '%s' found / user not allowed to connect.", conn.User())
 
 	}
 
-	fpProvidedPubKey, err := pubKeyFingerprint(key)
-	if err != nil {
-		log.Printf("(keyAuth) >>  Error: Unable to create fingerprint for provided PubKey: %s\n", err.Error())
-	}
-	log.Printf("(keyAuth) >>  Fingerprint of provided PubKey  : %s\n", fpProvidedPubKey)
-	fpAuthorizedPubKey, err := pubKeyFingerprint(authorizedPubKey)
-	if err != nil {
-		log.Printf("(keyAuth) >>  Error: Unable to create fingerprint for authorized PubKey: %s\n", err.Error())
-	}
-	log.Printf("(keyAuth) >>  Fingerprint of authorized PubKey: %s\n", fpAuthorizedPubKey)
+	// Check if the user is allowed to connect at all (meaning: the must be a subdirectory in the 'data' dir
+	// matching the provided SSH username).
+	var authSuccess bool = false
+	for i, authPubKey := range authorizedPubKeys {
 
-	// Check if username and Public Key combination is allowed to establish a connection.
-	if theseTwoPublicKeysAreEqual(key, authorizedPubKey) {
+		fpAuthorizedPubKey, err := pubKeyFingerprint(authPubKey)
+		if err != nil {
+			log.Printf("(keyAuth) >>  Error: Unable to create fingerprint for authorized PubKey %d: %s\n", i, err.Error())
+		}
+		log.Printf("(keyAuth) >>  Fingerprint of authorized PubKey %d: %s\n", i, fpAuthorizedPubKey)
+
+		// Check if username and Public Key combination is allowed to establish a connection.
+		if theseTwoPublicKeysAreEqual(key, authPubKey) {
+			authSuccess = true
+			break
+
+		}
+	}
+	if authSuccess {
 		log.Printf("(keyAuth) >>  Correct username '%s' and public key provided.", conn.User())
 		// Signaling success / authentication passed.
 		return nil, nil
