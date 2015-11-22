@@ -9,7 +9,7 @@ It's essential a funny behaving SSH server.
 - _sectra_ itself needs a host key pair to work. If no SSH key pair exists in `sectra/host_key`, a new _host key_ pair will be generated automatically by _sectra_ (requires `ssh-keygen` command to be found in `PATH`).
   - **Warning:** The newly created SSH _private_ key will be generated *without* a passphrase. So please keep it private or better yet, _delete it directly after it's not needed anymore._ 
 
-##### Create the user-specific subdirectories:
+###### Create the user-specific subdirectories:
 	
 - _The Up&Running way:_  
 	If the user who should connect tot the _sectra_ server has one ore more public SSH keys added to his  [GitHub](https://github.com/) profile, then the fastest way to use them with _sectra_ is: 
