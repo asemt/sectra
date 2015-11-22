@@ -9,13 +9,17 @@ It's essential a funny behaving SSH server.
 - _sectra_ itself needs a host key pair to work. If no SSH key pair exists in `sectra/host_key`, a new _host key_ pair will be generated automatically by _sectra_ (requires `ssh-keygen` command to be found in `PATH`).
   - **Warning:** The newly created SSH _private_ key will be generated *without* a passphrase. So please keep it private or better yet, _delete it directly after it's not needed anymore._ 
 
-- Create the user-specific subdirectories:
-	- _The Up&Running way:_
-	If the user who should connect tot the _sectra_ server has public SSH keys on [GitHub](https://github.com/), then the fastest way to use them with _sectra_ is:
-	   $ ./binaries/osx/fetchghkeys username
-	This will create a new subdirectory `./data/username`, which contains the `authorized_keys` file containing the fetched public SSH keys for the user.
-	- _The manual way:_
-		- Create a subdirectory under the `data` directory which has to match a SSH username that should be allowed to connect to the sectra server. Inside the user-sepcific subdirectory, the public SSH keys of the user who is allowed to connect have to be placed in a file named `authorized_keys` in the same format as used by  [OpenSSH](http://www.openssh.com/).
+##### Create the user-specific subdirectories:
+	
+- _The Up&Running way:_  
+	If the user who should connect tot the _sectra_ server has one ore more public SSH keys added to his  [GitHub](https://github.com/) profile, then the fastest way to use them with _sectra_ is: 
+
+            $ ./binaries/osx/fetchghkeys <GitHub username>
+
+	This will create a new subdirectory `./data/<GitHub username>`, which contains the `authorized_keys` file containing the fetched public SSH keys for the user given by `<GitHub username>`.
+
+- _The manual way:_  
+	Create a subdirectory under the `data` directory which has to match a SSH username that should be allowed to connect to the sectra server. Inside the user-sepcific subdirectory, the public SSH keys of the user who is allowed to connect have to be placed in a file named `authorized_keys` in the same format as used by  [OpenSSH](http://www.openssh.com/).
 A file named `payload` in the same user-sepcific subdirectory contains the actually sensitive information which should be transfered (make sure it uses DOS line endings (`:set ff=dos` in Vim)).
 
 - Example directory structure:
