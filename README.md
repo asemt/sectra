@@ -23,16 +23,16 @@ It's essential a funny behaving SSH server.
 	Create a subdirectory under the `data` directory which has to match a SSH username that should be allowed to connect to the sectra server. Inside the user-sepcific subdirectory, the public SSH keys of the user who is allowed to connect have to be placed in a file named `authorized_keys` in the same format as used by  [OpenSSH](http://www.openssh.com/).
 A file named `payload` in the same user-sepcific subdirectory contains the actually sensitive information which should be transfered (make sure it uses DOS line endings (`:set ff=dos` in Vim)).
 
-- Example directory structure:
-
-        .
-        ├── data
-        │   └── username
-        │       ├── authorized_keys
-        │       └── payload
-        ├── host_key
-        │   ├── id_rsa
-        │   └── id_rsa.pub
+	- Example directory structure:
+	
+	        .
+	        ├── data
+	        │   └── username
+	        │       ├── authorized_keys
+	        │       └── payload
+	        ├── host_key
+	        │   ├── id_rsa
+	        │   └── id_rsa.pub
 
 #### How to run the _sectra_ server (OS X):
 
