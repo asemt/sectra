@@ -16,7 +16,8 @@ It's essential a funny behaving SSH server.
 
             $ ./binaries/osx/fetchghkeys <GitHub username>
 
-	This will create a new subdirectory `./data/<GitHub username>`, which contains the `authorized_keys` file containing the fetched public SSH keys for the user given by `<GitHub username>`.
+	This will create a new subdirectory `./data/<GitHub username>`, which contains the `authorized_keys` file containing the fetched public SSH keys for the user given by `<GitHub username>`.  
+	Last thing to do is to create a file `./data/<GitHub username>/payload` and put the actual sensitive data to transport into it. Then the the _sectra_ server can be started.
 
 - _The manual way:_  
 	Create a subdirectory under the `data` directory which has to match a SSH username that should be allowed to connect to the sectra server. Inside the user-sepcific subdirectory, the public SSH keys of the user who is allowed to connect have to be placed in a file named `authorized_keys` in the same format as used by  [OpenSSH](http://www.openssh.com/).
