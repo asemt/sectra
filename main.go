@@ -289,6 +289,7 @@ func handleNewClientConn(newClientInfoChan chan NewClientInfo) {
 				payload, err := ioutil.ReadFile(payloadPath)
 				if err != nil {
 					log.Printf("(handleNewClientConn) >>  Error: Could not read payload file '%s' for user '%s': %s", payloadPath, sshServerConn.User(), err.Error())
+					return
 				}
 				log.Printf("(handleNewClientConn) >>  Successfully retrieved contents of payload file '%s' for user '%s'.\n", payloadPath, sshServerConn.User())
 				_, err = channel.Write(payload)
