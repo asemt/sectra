@@ -33,14 +33,14 @@ A file named `payload` in the same user-sepcific subdirectory contains the actua
         │   ├── id_rsa
         │   └── id_rsa.pub
 
-#### How to run the _sectra_ server:
+#### How to run the _sectra_ server (OS X):
 
     	# optional (default port is 3333):
     	#export PORT=3456
     	# run the sectra server:
     	$ ./binaries/osx/sectra
 
-#### How to connect to the _sectra_ server (OS X):
+#### How to connect to the _sectra_ server:
 
         $ ssh -q username@<sectra-HOST-IP> -p 3333
 If nothing gets displayed on the console, run the `ssh` command with `-vvv` to see debug messages.
