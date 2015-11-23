@@ -25,7 +25,6 @@ func main() {
 	}
 	spltdPth := strings.Split(cwd, string(os.PathSeparator))
 	curDirName := spltdPth[len(spltdPth)-1]
-	log.Printf("dirName: %s", curDirName)
 	if curDirName != "sectra" {
 		log.Fatalf("(main) >>  Error, fetchghkeys not called from inside sectra directory.")
 	}
@@ -42,7 +41,11 @@ func main() {
 	if err != nil {
 		log.Printf("(main) >>  Error while ListKeys for user '%s': %s", username, err.Error())
 	}
-	log.Printf("(main) >>  Found %d public SSH key(s) for user '%s'.\n", len(keys), username)
+        if len(keys) == 0 {
+        	log.Printf("(main) >>  User '%s' has no SSH keys on GitHub. Doing nothing.", username)
+		os.Exit(1)
+        }	
+        log.Printf("(main) >>  Found %d public SSH key(s) for user '%s'.\n", len(keys), username)
 	// Only going forward if we got at least one GitHub key.
 	if len(keys) >= 1 {
 		// Check if user-sepcific directory already exists, if so, exit immediateley.
@@ -81,6 +84,5 @@ func main() {
 			log.Printf("(main) >>  Error syncing file '%s' after writing: %s", akfPth, err.Error())
 		}
 	}
-        log.Printf("(main) >>  User '%s' has no SSH keys on GitHub. Doing nothing.", username)
 
 } // main
