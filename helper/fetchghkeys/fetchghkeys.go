@@ -81,5 +81,6 @@ func main() {
 			log.Printf("(main) >>  Error syncing file '%s' after writing: %s", akfPth, err.Error())
 		}
 	}
+        log.Printf("(main) >>  User '%s' has no SSH keys on GitHub. Doing nothing.", username)
 
 } // main
