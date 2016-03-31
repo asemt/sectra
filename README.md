@@ -14,7 +14,7 @@ It's essential a funny behaving SSH server.
 - _The Up&Running way:_  
 	If the user who should connect tot the _sectra_ server has one ore more public SSH keys added to his  [GitHub](https://github.com/) profile, then the fastest way to use them with _sectra_ is: 
 
-            $ ./binaries/osx/fetchghkeys <GitHub username>
+            $ ./binaries/osx/fetchghkeys/fetchghkeys <GitHub username>
 
 	This will create a new subdirectory `./data/<GitHub username>`, which contains the `authorized_keys` file containing the fetched public SSH keys for the user given by `<GitHub username>`.  
 	Last thing to do is to create a file `./data/<GitHub username>/payload` and put the actual sensitive data to transport into it. Then the the _sectra_ server can be started.
